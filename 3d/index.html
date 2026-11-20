@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#110d24">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Ślad Światła 3D — Wojtek i Anetka</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="hud" class="hidden">
+    <div class="hud-card"><div id="hearts">♥ ♥ ♥ ♥ ♥</div><small id="modeLabel">TRYB ANETKI ∞</small></div>
+    <div class="hud-card center"><b id="levelName">ZIELONE RUINY</b><div id="shards">◇ ◇ ◇ ◇ ◇</div></div>
+    <button id="pauseBtn" aria-label="Pauza">Ⅱ</button>
+  </div>
+  <div id="story" class="hidden"><b id="speaker">WOJTEK</b><span id="storyText"></span></div>
+  <div id="menu" class="overlay visible">
+    <div class="panel">
+      <div class="gem">◆</div>
+      <p class="kicker" data-pl="PRAWDZIWA GRA WEBGL 3D" data-en="TRUE WEBGL 3D GAME">PRAWDZIWA GRA WEBGL 3D</p>
+      <h1>ŚLAD ŚWIATŁA <em>3D</em></h1>
+      <p class="intro" data-pl="Wojtek wyrusza przez pięć trójwymiarowych krain, aby ocalić księżniczkę Anetkę z rąk Króla Cieni." data-en="Wojtek journeys across five three-dimensional realms to save Princess Anetka from the Shadow King.">Wojtek wyrusza przez pięć trójwymiarowych krain, aby ocalić księżniczkę Anetkę z rąk Króla Cieni.</p>
+      <div class="modes">
+        <button id="anetkaMode" class="selected"><b data-pl="TRYB ANETKI" data-en="ANETKA MODE">TRYB ANETKI</b><span data-pl="Nieśmiertelność" data-en="Invincible">Nieśmiertelność</span></button>
+        <button id="normalMode"><b data-pl="TRYB WOJTKA" data-en="WOJTEK MODE">TRYB WOJTKA</b><span data-pl="5 serduszek" data-en="5 hearts">5 serduszek</span></button>
+      </div>
+      <button id="startBtn" class="primary" data-pl="ROZPOCZNIJ WYPRAWĘ" data-en="START ADVENTURE">ROZPOCZNIJ WYPRAWĘ</button>
+      <div id="levels" class="levels"></div>
+      <div class="bottom-row"><button id="langBtn">ENGLISH</button><span>CODEX × MINO</span></div>
+    </div>
+  </div>
+  <div id="pause" class="overlay"><div class="panel small"><h2 data-pl="PAUZA" data-en="PAUSED">PAUZA</h2><button id="resumeBtn" class="primary" data-pl="GRAJ DALEJ" data-en="RESUME">GRAJ DALEJ</button><button id="restartBtn" data-pl="OD NOWA" data-en="RESTART">OD NOWA</button><button id="menuBtn" data-pl="MENU" data-en="MENU">MENU</button></div></div>
+  <div id="ending" class="overlay"><div class="panel"><div class="gem heart">♥</div><h2 data-pl="MIŁOŚĆ OCALIŁA PIĘĆ KRAIN" data-en="LOVE SAVED THE FIVE REALMS">MIŁOŚĆ OCALIŁA PIĘĆ KRAIN</h2><p data-pl="Wojtek i księżniczka Anetka wrócili razem do domu. Światło ich miłości pokonało Koronę Cienia." data-en="Wojtek and Princess Anetka returned home together. The light of their love defeated the Shadow Crown.">Wojtek i księżniczka Anetka wrócili razem do domu. Światło ich miłości pokonało Koronę Cienia.</p><button id="againBtn" class="primary" data-pl="ZAGRAJ PONOWNIE" data-en="PLAY AGAIN">ZAGRAJ PONOWNIE</button></div></div>
+  <div id="controls" class="hidden">
+    <div id="joystick"><div id="stick"></div></div>
+    <button id="jumpBtn"><b>↑</b><span data-pl="SKOK" data-en="JUMP">SKOK</span></button>
+    <button id="fireBtn"><b>✦</b><span data-pl="STRZAŁ" data-en="FIRE">STRZAŁ</span></button>
+  </div>
+  <div id="rotate"><b data-pl="Obróć telefon poziomo" data-en="Turn your phone sideways">Obróć telefon poziomo</b></div>
+  <div id="loading"><div></div><span data-pl="BUDOWANIE ŚWIATA 3D…" data-en="BUILDING THE 3D WORLD…">BUDOWANIE ŚWIATA 3D…</span></div>
+  <script src="game.js"></script>
+</body>
+</html>
