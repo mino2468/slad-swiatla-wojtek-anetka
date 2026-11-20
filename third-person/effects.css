@@ -1,0 +1,6 @@
+#cinematicBars{position:fixed;inset:0;z-index:18;pointer-events:none}
+#cinematicBars:before,#cinematicBars:after{content:"";position:absolute;left:0;width:100%;height:9vh;background:#050308;box-shadow:0 0 30px #000}
+#cinematicBars:before{top:0}
+#cinematicBars:after{bottom:0}
+#hitFlash{position:fixed;inset:0;z-index:6;pointer-events:none;opacity:0;background:radial-gradient(circle,transparent 42%,rgba(255,46,102,.72));transition:opacity .08s}
+#hitFlash.on{opacity:1}

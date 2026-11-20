@@ -1,0 +1,22 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#120d1e"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><title>Ślad Światła — Cytadela Cienia</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="effects.css"></head><body>
+<canvas id="game"></canvas>
+<div id="vignette"></div>
+<div id="cinematicBars" class="hidden"></div>
+<div id="hitFlash"></div>
+<div id="hud" class="hidden">
+  <div class="hearts"><span id="hearts">♥ ♥ ♥ ♥ ♥</span><small id="modeText">TRYB ANETKI ∞</small></div>
+  <div class="chapter"><b>CYTADELA CIENIA</b><div id="shards">◆ ◆ ◆ ◆ ◆</div></div>
+  <div class="ammo"><i></i><b id="ammo">28</b><span>/ 180</span></div>
+  <div id="bossBar" class="boss hidden"><label>KRÓL CIENI</label><div><span></span></div></div>
+</div>
+<div id="crosshair" class="hidden"><i></i><i></i><i></i><i></i></div>
+<div id="objective" class="hidden"><small data-pl="CEL" data-en="OBJECTIVE">CEL</small><b id="objectiveText">Dotrzyj do Anetki</b></div>
+<div id="dialogue" class="hidden"><b id="speaker">WOJTEK</b><span id="line"></span></div>
+<button id="pauseBtn" class="hidden">Ⅱ</button>
+<div id="controls" class="hidden"><div id="joystick"><div id="stick"></div></div><div id="lookZone"></div><button id="dodgeBtn"><i>↯</i><span data-pl="UNIK" data-en="DODGE">UNIK</span></button><button id="fireBtn"><i>✦</i><span data-pl="STRZAŁ" data-en="FIRE">STRZAŁ</span></button></div>
+<section id="menu" class="overlay visible"><div class="menu-card"><div class="sigil">◆</div><p class="eyebrow" data-pl="FILMOWA GRA AKCJI — TRZECIA OSOBA" data-en="CINEMATIC THIRD-PERSON ACTION">FILMOWA GRA AKCJI — TRZECIA OSOBA</p><h1>ŚLAD ŚWIATŁA</h1><h2>CYTADELA CIENIA</h2><p data-pl="Wojtek wkroczył do ostatniej cytadeli. Król Cieni stoi między nim a księżniczką Anetką." data-en="Wojtek has entered the final citadel. The Shadow King stands between him and Princess Anetka.">Wojtek wkroczył do ostatniej cytadeli. Król Cieni stoi między nim a księżniczką Anetką.</p><div class="modes"><button id="anetkaMode" class="active"><b data-pl="TRYB ANETKI" data-en="ANETKA MODE">TRYB ANETKI</b><small data-pl="Nieśmiertelność" data-en="Invincible">Nieśmiertelność</small></button><button id="normalMode"><b data-pl="TRYB WOJTKA" data-en="WOJTEK MODE">TRYB WOJTKA</b><small data-pl="5 serduszek" data-en="5 hearts">5 serduszek</small></button></div><button id="startBtn" class="primary" data-pl="WEJDŹ DO CYTADELI" data-en="ENTER THE CITADEL">WEJDŹ DO CYTADELI</button><div class="footer"><button id="langBtn">ENGLISH</button><span>CODEX × MINO</span></div></div></section>
+<section id="pause" class="overlay"><div class="menu-card compact"><h2 data-pl="PAUZA" data-en="PAUSED">PAUZA</h2><button id="resumeBtn" class="primary" data-pl="GRAJ DALEJ" data-en="RESUME">GRAJ DALEJ</button><button id="restartBtn" data-pl="OD NOWA" data-en="RESTART">OD NOWA</button></div></section>
+<section id="end" class="overlay"><div class="menu-card"><div class="sigil heart">♥</div><p class="eyebrow" data-pl="KSIĘŻNICZKA OCALONA" data-en="PRINCESS RESCUED">KSIĘŻNICZKA OCALONA</p><h1>WOJTEK ♥ ANETKA</h1><p data-pl="Korona Cienia pękła, a światło zakochanych powróciło do pięciu krain." data-en="The Shadow Crown shattered and the lovers' light returned to the five realms.">Korona Cienia pękła, a światło zakochanych powróciło do pięciu krain.</p><button id="againBtn" class="primary" data-pl="ZAGRAJ PONOWNIE" data-en="PLAY AGAIN">ZAGRAJ PONOWNIE</button></div></section>
+<div id="rotate"><b data-pl="Obróć telefon poziomo" data-en="Turn your phone sideways">Obróć telefon poziomo</b></div>
+<div id="loading"><div class="loader"><i></i></div><b data-pl="OTWIERANIE CYTADELI…" data-en="OPENING THE CITADEL…">OTWIERANIE CYTADELI…</b><span id="loadProgress">0%</span></div>
+<style>#crosshair.locked{filter:drop-shadow(0 0 8px #ff4d83)}#crosshair.locked i{background:#ff5a86;box-shadow:0 0 9px #ff3d79}#crosshair.locked::after{content:"NAMIERZONO";position:absolute;left:50%;top:50px;transform:translateX(-50%);color:#ff8eac;font-size:8px;font-weight:900;letter-spacing:.15em;text-shadow:0 2px 4px #000}</style><script src="game.js"></script></body></html>
