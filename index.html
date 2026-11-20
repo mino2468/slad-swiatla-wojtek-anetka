@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Ślad Światła">
-  <title>Ślad Światła — Wojtek i Anetka · gra na telefon</title>
+  <title>Ślad Światła 2.5D — Wojtek i Anetka</title>
   <style>
 :root {
   color-scheme: dark;
@@ -43,6 +43,8 @@ canvas {
   height: 100%;
   image-rendering: pixelated;
   background: #151831;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .overlay {
@@ -235,6 +237,12 @@ button.dark { background: linear-gradient(#4c4b63, #2b2c45); box-shadow: 0 4px 0
   font: 12px monospace;
   letter-spacing: .08em;
 }
+.remaster-note {
+  margin: 7px 0 0 !important;
+  color: #755062;
+  font: bold 10px monospace;
+  letter-spacing: .09em;
+}
 
 #rotateHint {
   display: none;
@@ -263,6 +271,7 @@ button.dark { background: linear-gradient(#4c4b63, #2b2c45); box-shadow: 0 4px 0
   h1 { font-size: 35px; }
   .lead { font-size: 13px; }
   button { padding: 10px 18px; margin: 9px auto 6px; }
+  .remaster-note { display: none; }
 }
 
 </style>
@@ -274,7 +283,7 @@ button.dark { background: linear-gradient(#4c4b63, #2b2c45); box-shadow: 0 4px 0
     <section id="startScreen" class="overlay visible">
       <div class="card menu-card">
         <div class="crest"><span>◆</span></div>
-        <p class="eyebrow">BAJKOWA GRA PLATFORMOWA</p>
+        <p class="eyebrow">MOBILNY REMASTER 2.5D</p>
         <h1>ŚLAD ŚWIATŁA</h1>
         <p class="lead">Król Cieni porwał księżniczkę Anetkę i rozbił jej światło na pięć krain. Wojtek rusza przez cały zaczarowany świat, aby ocalić ukochaną i już nigdy jej nie stracić.</p>
         <div class="mode-picker" aria-label="Wybór trybu gry">
@@ -293,6 +302,7 @@ button.dark { background: linear-gradient(#4c4b63, #2b2c45); box-shadow: 0 4px 0
           <div><strong>STEROWANIE</strong><span>Dotyk / A D / strzałki · Skok: W lub ↑ · Karabin: E</span></div>
           <div><strong>BOHATEROWIE</strong><span>Wojtek ♥ księżniczka Anetka</span></div>
         </div>
+        <p class="remaster-note">GŁĘBIA 2.5D · PŁYNNA KAMERA · DOTYKOWE STEROWANIE</p>
         <button id="soundBtn" class="tiny-button" type="button">DŹWIĘK: WŁ.</button>
         <p class="credits">TWÓRCY: <b>CODEX I MINO</b></p>
       </div>
@@ -658,6 +668,10 @@ let storyFlags = {};
 let audio = null;
 let musicTimer = null;
 let soundEnabled = true;
+let combo = 0;
+let comboTimer = 0;
+const coarsePointer = matchMedia("(pointer:coarse)").matches;
+const lowPowerDevice = coarsePointer && ((navigator.hardwareConcurrency || 4) <= 4 || (navigator.deviceMemory || 4) <= 3);
 
 const keys = {};
 const touch = { left: false, right: false, jump: false, act: false };
@@ -773,6 +787,8 @@ function loadLevel(index, fromStory) {
   levelTime = 0;
   ambientClock = 0;
   storyFlags = { middle: false, gate: false };
+  combo = 0;
+  comboTimer = 0;
   mode = "play";
   ui.start.classList.remove("visible");
   ui.pause.classList.remove("visible");
@@ -1009,7 +1025,7 @@ function spawnAmbient(dt) {
   if (ambientClock > 0) return;
   const type = BIOMES[currentLevel].ambient;
   const rates = { leaf: .08, firefly: .055, snow: .025, ember: .035, magic: .04 };
-  ambientClock = rates[type] || .06;
+  ambientClock = (rates[type] || .06) * (lowPowerDevice ? 1.75 : 1);
   const x = cam + Math.random() * W;
   const y = 80 + Math.random() * 500;
   let p;
@@ -1125,6 +1141,8 @@ function damageEnemy(e, bulletHit) {
   shake = Math.max(shake, e.elite ? 6 : 3);
   emit(e.x + e.w / 2, e.y + e.h / 2, e.elite ? 13 : 8, BIOMES[currentLevel].palette.glow, "spark", e.elite ? 170 : 120);
   tone(e.elite ? 115 : 180, .08, "square", .035);
+  combo = Math.min(9, combo + 1);
+  comboTimer = 2.25;
   if (e.hp <= 0) {
     e.alive = false;
     emit(e.x + e.w / 2, e.y + e.h / 2, e.elite ? 34 : 18, BIOMES[currentLevel].palette.accent, "spark", e.elite ? 230 : 170);
@@ -1317,13 +1335,16 @@ function update(dt) {
   updateShots(dt);
   collectAndStory(dt);
   updateParticles(dt);
+  comboTimer = Math.max(0, comboTimer - dt);
+  if (comboTimer <= 0) combo = 0;
 
   if (dialogue) {
     dialogue.time -= dt;
     if (dialogue.time <= 0) dialogue = null;
   }
-  const targetCam = Math.max(0, Math.min(level.worldW - W, player.x - 360));
-  cam += (targetCam - cam) * Math.min(1, dt * 4.5);
+  const lookAhead = Math.max(-110, Math.min(170, player.vx * .42));
+  const targetCam = Math.max(0, Math.min(level.worldW - W, player.x - 390 + lookAhead));
+  cam += (targetCam - cam) * (1 - Math.exp(-6.2 * dt));
   shake *= Math.pow(.008, dt);
 }
 
@@ -1390,11 +1411,67 @@ function drawBackground() {
   ctx.fillRect(0, 0, W, H);
 }
 
+function drawParallaxDepth() {
+  const pal = BIOMES[currentLevel].palette;
+  ctx.save();
+  for (let layer = 0; layer < 3; layer++) {
+    const speed = .11 + layer * .07;
+    const baseY = 365 + layer * 58;
+    const width = 155 - layer * 18;
+    const shift = -((cam * speed) % width);
+    ctx.globalAlpha = .08 + layer * .035;
+    ctx.fillStyle = layer === 0 ? pal.deep : (layer === 1 ? pal.mid : pal.stone);
+    ctx.beginPath();
+    ctx.moveTo(-width, H);
+    for (let x = shift - width; x <= W + width; x += width) {
+      const seed = Math.floor((x + cam * speed) / width) + currentLevel * 17;
+      const peak = baseY - 42 - Math.abs(Math.sin(seed * 2.31)) * (58 + layer * 15);
+      ctx.lineTo(x, baseY);
+      ctx.lineTo(x + width * .43, peak);
+      ctx.lineTo(x + width, baseY);
+    }
+    ctx.lineTo(W + width, H);
+    ctx.closePath();
+    ctx.fill();
+  }
+  const mist = ctx.createLinearGradient(0, 280, 0, 590);
+  mist.addColorStop(0, "rgba(255,255,255,0)");
+  mist.addColorStop(.58, "rgba(210,225,255,.035)");
+  mist.addColorStop(1, "rgba(8,9,25,.18)");
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = mist;
+  ctx.fillRect(0, 260, W, 360);
+  ctx.restore();
+}
+
 function drawPlatform(p) {
   const x = worldX(p.x);
   if (x > W + 20 || x + p.w < -20) return;
   const pal = BIOMES[currentLevel].palette;
   const height = p.floating ? p.h : Math.max(p.h, H - p.y + 90);
+  const depth = p.floating ? 13 : 18;
+
+  // Perspektywiczna górna płaszczyzna i boczna krawędź dają efekt 2.5D
+  // bez kosztownego WebGL — ważne dla płynności mobilnego Safari.
+  ctx.save();
+  ctx.fillStyle = pal.top2;
+  ctx.beginPath();
+  ctx.moveTo(x, p.y);
+  ctx.lineTo(x + p.w, p.y);
+  ctx.lineTo(x + p.w + depth, p.y + depth * .55);
+  ctx.lineTo(x + depth, p.y + depth * .55);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = pal.line;
+  ctx.globalAlpha = .62;
+  ctx.beginPath();
+  ctx.moveTo(x + p.w, p.y);
+  ctx.lineTo(x + p.w + depth, p.y + depth * .55);
+  ctx.lineTo(x + p.w + depth, p.y + Math.min(height, 70));
+  ctx.lineTo(x + p.w, p.y + Math.min(height, 62));
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
   ctx.fillStyle = pal.deep;
   ctx.fillRect(x, p.y, p.w, height);
 
@@ -1825,7 +1902,10 @@ function drawCrystal(c) {
 function drawShadow(x, y, w, alpha) {
   ctx.save();
   ctx.globalAlpha = alpha || .28;
-  ctx.fillStyle = "#050711";
+  const shadow = ctx.createRadialGradient(worldX(x), y, 2, worldX(x), y, w);
+  shadow.addColorStop(0, "rgba(3,4,12,.9)");
+  shadow.addColorStop(1, "rgba(3,4,12,0)");
+  ctx.fillStyle = shadow;
   ctx.beginPath();
   ctx.ellipse(worldX(x), y, w, 9, 0, 0, Math.PI * 2);
   ctx.fill();
@@ -2010,6 +2090,24 @@ function drawLighting() {
   ctx.fillStyle = pal.glow;
   ctx.fillRect(0, 0, W, H);
   ctx.restore();
+
+  if (!lowPowerDevice) {
+    ctx.save();
+    ctx.globalCompositeOperation = "screen";
+    ctx.globalAlpha = .035;
+    ctx.fillStyle = pal.glow;
+    const rayShift = Math.sin(levelTime * .35) * 38;
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(110 + i * 330 + rayShift, 0);
+      ctx.lineTo(250 + i * 330 + rayShift, 0);
+      ctx.lineTo(485 + i * 330, H);
+      ctx.lineTo(285 + i * 330, H);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
 }
 
 function panel(x, y, w, h) {
@@ -2066,6 +2164,14 @@ function drawHud() {
   for (let i = 0; i < MAX_HEARTS; i++) heart(30 + i * 38, 34, isInvincible() || i < player.hearts, .61);
   pixelText(isInvincible() ? "∞  TRYB ANETKI" : player.hearts + " / " + MAX_HEARTS, 224, 56, 14, "left", "#fff0c7", "#171525");
   pixelText("WOJTEK  ♥  ANETKA", 224, 78, 10, "left", pal.accent, "#171525");
+  if (combo > 1 && comboTimer > 0) {
+    const pulse = 1 + Math.sin(levelTime * 12) * .04;
+    ctx.save();
+    ctx.translate(346, 122);
+    ctx.scale(pulse, pulse);
+    pixelText("SERIA x" + combo, 0, 0, 18, "right", pal.glow, "#171525");
+    ctx.restore();
+  }
 
   panel(370, 12, 540, 91);
   pixelText(BIOMES[currentLevel].name, 640, 39, 20, "center", "#fff2ca", "#281b35");
@@ -2109,12 +2215,15 @@ function drawControls() {
     { x: 1008, y: 625, label: "↑", size: 49 },
     { x: 1170, y: 625, label: "✦", size: 42 }
   ];
-  for (const c of controls) {
+  for (let i = 0; i < controls.length; i++) {
+    const c = controls[i];
+    const pressed = i === 0 ? touch.left : i === 1 ? touch.right : i === 2 ? touch.jump : touch.act;
+    const radius = pressed ? 62 : 58;
     ctx.fillStyle = "#18172d";
     ctx.strokeStyle = "#f0d58d";
     ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.arc(c.x, c.y, 58, 0, Math.PI * 2);
+    ctx.arc(c.x, c.y, radius, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
     ctx.strokeStyle = pal.accent;
@@ -2122,13 +2231,35 @@ function drawControls() {
     ctx.beginPath();
     ctx.arc(c.x, c.y, 48, 0, Math.PI * 2);
     ctx.stroke();
-    ctx.globalAlpha = .9;
+    ctx.globalAlpha = pressed ? 1 : .9;
+    if (pressed) {
+      ctx.shadowColor = pal.glow;
+      ctx.shadowBlur = 20;
+    }
     pixelText(c.label, c.x, c.y + 17, c.size, "center", "#fff6d6", "#191528");
     ctx.globalAlpha = .58;
   }
   ctx.globalAlpha = .9;
   pixelText("SKOK", 1008, 701, 11, "center", "#fff1c3", "#171525");
   pixelText("STRZAŁ", 1170, 701, 11, "center", "#fff1c3", "#171525");
+  ctx.restore();
+}
+
+function drawSpeedDepth() {
+  if (!player || !player.on || Math.abs(player.vx) < 245 || lowPowerDevice) return;
+  const direction = Math.sign(player.vx);
+  ctx.save();
+  ctx.globalAlpha = Math.min(.16, (Math.abs(player.vx) - 240) / 600);
+  ctx.strokeStyle = BIOMES[currentLevel].palette.accent;
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 9; i++) {
+    const y = 150 + ((i * 73 + Math.floor(levelTime * 260)) % 440);
+    const x = direction > 0 ? 40 + (i * 149) % 850 : W - 40 - (i * 149) % 850;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - direction * (35 + i * 5), y);
+    ctx.stroke();
+  }
   ctx.restore();
 }
 
@@ -2582,6 +2713,7 @@ function draw() {
   ctx.save();
   ctx.translate((Math.random() - .5) * shake, (Math.random() - .5) * shake);
   drawBackground();
+  drawParallaxDepth();
   drawParticles("ambient");
   for (const p of level.platforms) drawPlatform(p);
   for (const s of level.spikes) drawSpike(s);
@@ -2592,6 +2724,7 @@ function draw() {
   drawBulletsAndShots();
   drawHero();
   drawParticles();
+  drawSpeedDepth();
   ctx.restore();
 
   drawLighting();
@@ -2662,6 +2795,8 @@ window.__gameDebug = {
       shards: player ? player.shards : null,
       crystalsLeft: crystals.filter(function(c) { return !c.taken; }).length,
       remainingCrystalXs: crystals.filter(function(c) { return !c.taken; }).map(function(c) { return c.x; }),
+      bullets: bullets.length,
+      combo: combo,
       enemiesLeft: enemies.filter(function(e) { return e.alive; }).length,
       bossHp: enemies.length ? enemies[enemies.length - 1].hp : null,
       enemyAnimationFrames: art.enemyAnimations[0][currentLevel] ? art.enemyAnimations[0][currentLevel].length : 0,
